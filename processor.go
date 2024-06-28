@@ -7,6 +7,7 @@ package asynq
 import (
 	"context"
 	"fmt"
+	"github.com/hibiken/asynq/utils"
 	"math"
 	"math/rand"
 	"runtime"
@@ -172,6 +173,23 @@ func (p *processor) exec() {
 	case <-p.quit:
 		return
 	case p.sema <- struct{}{}: // acquire token
+
+		// 获取系统负载
+		// 系统负载大于2倍则不获取任务
+		sysType := runtime.GOOS
+		if sysType == "linux" {
+			load := utils.Loadavg{}
+			err := load.Loadavg()
+			if err != nil {
+				p.logger.Debug("An error occurred obtaining the system load", err)
+			} else {
+				if load.La1 > load.MaxLoad {
+					<-p.sema // release tokenyyp
+					return
+				}
+			}
+		}
+
 		qnames := p.queues()
 		msg, leaseExpirationTime, err := p.broker.Dequeue(qnames...)
 		switch {
