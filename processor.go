@@ -7,7 +7,7 @@ package asynq
 import (
 	"context"
 	"fmt"
-	"github.com/hibiken/asynq/utils"
+	"github.com/liwenson/asynq/utils"
 	"math"
 	"math/rand"
 	"runtime"
