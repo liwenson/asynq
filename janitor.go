@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hibiken/asynq/internal/base"
-	"github.com/hibiken/asynq/internal/log"
+	"github.com/liwenson/asynq/internal/base"
+	"github.com/liwenson/asynq/internal/log"
 )
 
 // A janitor is responsible for deleting expired completed tasks from the specified

@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"github.com/hibiken/asynq/internal/errors"
-	pb "github.com/hibiken/asynq/internal/proto"
-	"github.com/hibiken/asynq/internal/timeutil"
+	"github.com/liwenson/asynq/internal/errors"
+	pb "github.com/liwenson/asynq/internal/proto"
+	"github.com/liwenson/asynq/internal/timeutil"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 )
