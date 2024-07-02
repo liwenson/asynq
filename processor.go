@@ -215,6 +215,7 @@ func (p *processor) exec() {
 		p.starting <- &workerInfo{msg, time.Now(), deadline, lease}
 		go func() {
 			defer func() {
+				time.Sleep(1 * time.Second) // 等待一秒钟后再释放令牌
 				p.finished <- msg
 				<-p.sema // release token
 			}()
@@ -247,6 +248,7 @@ func (p *processor) exec() {
 						ctx:    ctx,
 					},
 				)
+
 				resCh <- p.perform(ctx, task)
 			}()
 
