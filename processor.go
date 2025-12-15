@@ -21,6 +21,7 @@ import (
 	"github.com/hibiken/asynq/internal/errors"
 	"github.com/hibiken/asynq/internal/log"
 	"github.com/hibiken/asynq/internal/timeutil"
+	"github.com/hibiken/asynq/utils"
 	"golang.org/x/time/rate"
 )
 
@@ -172,6 +173,21 @@ func (p *processor) exec() {
 	case <-p.quit:
 		return
 	case p.sema <- struct{}{}: // acquire token
+		// 获取系统负载
+		// 系统负载大于2倍则不获取任务
+		sysType := runtime.GOOS
+		if sysType == "linux" {
+			load := utils.Loadavg{}
+			err := load.Loadavg()
+			if err != nil {
+				p.logger.Debug("An error occurred obtaining the system load", err)
+			} else {
+				if load.La1 > load.MaxLoad {
+					<-p.sema // release tokenyyp
+					return
+				}
+			}
+		}
 		qnames := p.queues()
 		msg, leaseExpirationTime, err := p.broker.Dequeue(qnames...)
 		switch {
@@ -198,6 +214,7 @@ func (p *processor) exec() {
 		p.starting <- &workerInfo{msg, time.Now(), deadline, lease}
 		go func() {
 			defer func() {
+				time.Sleep(3 * time.Second) // 等待3秒钟后再释放令牌
 				p.finished <- msg
 				<-p.sema // release token
 			}()
